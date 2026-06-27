@@ -948,7 +948,8 @@
       progress.style.display = 'block';
       fill.style.width = '30%';
 
-      const path = `scores/${Date.now()}_${file.name}`;
+      const sanitizedName = file.name.replace(/\s+/g, "_");
+      const path = `scores/${Date.now()}_${sanitizedName}`;
       const { error: upErr } = await sb.storage.from('worship-assets').upload(path, file);
 
       if (upErr) {
