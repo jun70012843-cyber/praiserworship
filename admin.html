@@ -3,672 +3,1042 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>PRAISER</title>
+  <title>Admin — Worship Team</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
-    /* ── RESET & BASE ── */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    html { scroll-behavior: smooth; }
     body {
-      background: #0a0a0a;
-      color: #e8e8e8;
-      font-family: 'Pretendard', 'Apple SD Gothic Neo', sans-serif;
-      line-height: 1.5;
-      overflow-x: hidden;
+      background: #0f0f0f;
+      color: #e0e0e0;
+      font-family: 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif;
+      min-height: 100vh;
     }
-    a { text-decoration: none; color: inherit; }
 
-    /* ── NAV ── */
-    nav {
+    /* ── 로그인 화면 ── */
+    .login-wrap {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+    }
+    .login-box {
+      background: #1a1a1a;
+      border: 0.5px solid #2a2a2a;
+      border-radius: 8px;
+      padding: 40px 36px;
+      width: 360px;
+    }
+    .login-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 6px;
+    }
+    .login-sub {
+      font-size: 12px;
+      color: #555;
+      margin-bottom: 28px;
+    }
+    .login-input {
+      display: block;
+      width: 100%;
+      background: #111;
+      border: 0.5px solid #2a2a2a;
+      border-radius: 4px;
+      padding: 10px 14px;
+      font-size: 13px;
+      color: #ccc;
+      outline: none;
+      margin-bottom: 10px;
+      font-family: inherit;
+      transition: border-color 0.2s;
+    }
+    .login-input:focus { border-color: #555; }
+    .login-btn {
+      width: 100%;
+      background: #fff;
+      color: #0f0f0f;
+      border: none;
+      border-radius: 4px;
+      padding: 11px;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      font-family: inherit;
+      margin-top: 4px;
+      transition: background 0.2s;
+    }
+    .login-btn:hover { background: #ddd; }
+    .login-err {
+      font-size: 12px;
+      color: #e05555;
+      margin-top: 10px;
+      text-align: center;
+    }
+
+    /* ── 어드민 레이아웃 ── */
+    #adminApp { display: none; }
+    .admin-nav {
       position: fixed;
       top: 0; left: 0; right: 0;
-      z-index: 100;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0 40px;
-      height: 56px;
-      background: rgba(10, 10, 10, 0.92);
-      backdrop-filter: blur(8px);
-      border-bottom: 0.5px solid #1e1e1e;
-    }
-    .nav-logo {
-      font-size: 18px;
-      font-weight: 800;
-      letter-spacing: 0.12em;
-      color: #fff;
-    }
-    .nav-links {
-      display: flex;
-      gap: 32px;
-    }
-    .nav-links a {
-      font-size: 11px;
-      letter-spacing: 0.1em;
-      color: #666;
-      transition: color 0.2s;
-    }
-    .nav-links a:hover { color: #fff; }
-    .nav-request {
-      font-size: 11px;
-      letter-spacing: 0.08em;
-      color: #fff;
-      border: 0.5px solid #444;
-      padding: 6px 14px;
-      border-radius: 2px;
-      transition: background 0.2s, border-color 0.2s;
-    }
-    .nav-request:hover { background: #fff; color: #0a0a0a; }
-
-    /* ── HERO SLIDER ── */
-    .hero {
-      position: relative;
-      width: 100%;
-      height: 100vh;
-      min-height: 500px;
-      overflow: hidden;
-      margin-top: 56px;
-    }
-    .hero-slides {
-      display: flex;
-      width: 100%;
-      height: 100%;
-      transition: transform 0.8s cubic-bezier(0.77, 0, 0.175, 1);
-    }
-    .hero-slide {
-      min-width: 100%;
-      height: 100%;
+      height: 52px;
       background: #111;
-      background-size: cover;
-      background-position: center;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .hero-slide-placeholder {
-      font-size: 12px;
-      color: #2a2a2a;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-    }
-    .hero-dots {
-      position: absolute;
-      bottom: 24px;
-      left: 50%;
-      transform: translateX(-50%);
-      display: flex;
-      gap: 8px;
-      z-index: 10;
-    }
-    .hero-dot {
-      width: 6px; height: 6px;
-      border-radius: 50%;
-      background: rgba(255,255,255,0.25);
-      cursor: pointer;
-      transition: background 0.3s, transform 0.3s;
-    }
-    .hero-dot.active {
-      background: #fff;
-      transform: scale(1.3);
-    }
-    .hero-prev, .hero-next {
-      position: absolute;
-      top: 50%;
-      transform: translateY(-50%);
-      z-index: 10;
-      background: none;
-      border: none;
-      color: rgba(255,255,255,0.3);
-      font-size: 28px;
-      cursor: pointer;
-      padding: 12px;
-      transition: color 0.2s;
-    }
-    .hero-prev:hover, .hero-next:hover { color: #fff; }
-    .hero-prev { left: 20px; }
-    .hero-next { right: 20px; }
-
-    /* ── 4-BANNER GRID ── */
-    .banners {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      border-top: 0.5px solid #1e1e1e;
-    }
-    .banner-item {
-      padding: 28px 24px;
-      min-height: 160px;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      cursor: pointer;
-      border-right: 0.5px solid #1e1e1e;
-      transition: background 0.2s;
-      background: #0d0d0d;
-    }
-    .banner-item:last-child { border-right: none; }
-    .banner-item:hover { background: #141414; }
-    .banner-item.highlighted {
-      background: #d8d8d8;
-      color: #0a0a0a;
-    }
-    .banner-item.highlighted:hover { background: #e8e8e8; }
-    .banner-title {
-      font-size: 20px;
-      font-weight: 800;
-      line-height: 1.25;
-      letter-spacing: -0.02em;
-    }
-    .banner-cat {
-      font-size: 9px;
-      letter-spacing: 0.14em;
-      text-transform: uppercase;
-      color: #444;
-    }
-    .banner-item.highlighted .banner-cat { color: #666; }
-
-    /* ── SECTION COMMON ── */
-    .section {
-      padding: 40px 40px;
-      border-top: 0.5px solid #1e1e1e;
-    }
-    .section-head {
-      display: flex;
-      justify-content: space-between;
-      align-items: baseline;
-      margin-bottom: 20px;
-    }
-    .section-title {
-      font-size: 15px;
-      font-weight: 700;
-      letter-spacing: 0.04em;
-      color: #fff;
-    }
-    .section-more {
-      font-size: 11px;
-      color: #444;
-      letter-spacing: 0.06em;
-      cursor: pointer;
-      transition: color 0.2s;
-    }
-    .section-more:hover { color: #aaa; }
-
-    /* ── VIDEO GRID ── */
-    .video-grid {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 8px;
-    }
-    .video-card {
-      border-radius: 3px;
-      overflow: hidden;
-      aspect-ratio: 16/9;
-      background: #161616;
-      position: relative;
-      cursor: pointer;
-    }
-    .video-card iframe {
-      width: 100%; height: 100%;
-      border: none;
-      pointer-events: none;
-    }
-    .video-card-thumb {
-      width: 100%; height: 100%;
-      background: #161616;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      position: absolute;
-      top: 0; left: 0;
-    }
-    .video-card-thumb img {
-      width: 100%; height: 100%;
-      object-fit: cover;
-    }
-    .video-card-overlay {
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(to top, rgba(0,0,0,0.75) 0%, transparent 55%);
-    }
-    .video-card-info {
-      position: absolute;
-      bottom: 8px; left: 8px; right: 8px;
-    }
-    .video-card-title {
-      font-size: 10px;
-      color: #e8e8e8;
-      line-height: 1.4;
-    }
-    .video-play-icon {
-      position: absolute;
-      top: 50%; left: 50%;
-      transform: translate(-50%, -50%);
-      width: 36px; height: 36px;
-      background: rgba(255,255,255,0.15);
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: background 0.2s;
-    }
-    .video-card:hover .video-play-icon { background: rgba(255,255,255,0.3); }
-    .video-play-icon::after {
-      content: '';
-      border-style: solid;
-      border-width: 6px 0 6px 10px;
-      border-color: transparent transparent transparent #fff;
-      margin-left: 2px;
-    }
-    .more-btn-wrap { text-align: center; margin-top: 20px; }
-    .more-btn {
-      font-size: 11px;
-      color: #555;
-      border: 0.5px solid #2a2a2a;
-      padding: 8px 28px;
-      border-radius: 2px;
-      cursor: pointer;
-      display: inline-block;
-      transition: color 0.2s, border-color 0.2s;
-      letter-spacing: 0.06em;
-    }
-    .more-btn:hover { color: #aaa; border-color: #555; }
-
-    /* ── SCORE LIST ── */
-    .score-list { display: flex; flex-direction: column; gap: 1px; background: #1a1a1a; border: 0.5px solid #1a1a1a; border-radius: 3px; overflow: hidden; }
-    .score-item {
+      border-bottom: 0.5px solid #222;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 14px 16px;
-      background: #0d0d0d;
-      transition: background 0.2s;
+      padding: 0 28px;
+      z-index: 100;
     }
-    .score-item:hover { background: #131313; }
-    .score-left { display: flex; align-items: center; gap: 12px; }
-    .score-icon {
-      width: 32px; height: 32px;
-      background: #1a1a1a;
-      border-radius: 3px;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 14px;
-    }
-    .score-name { font-size: 13px; color: #d8d8d8; }
-    .score-free { font-size: 10px; color: #444; margin-top: 1px; }
-    .score-dl {
+    .admin-nav-title { font-size: 14px; font-weight: 700; color: #fff; letter-spacing: 0.06em; }
+    .admin-nav-right { display: flex; align-items: center; gap: 16px; }
+    .admin-user { font-size: 12px; color: #555; }
+    .logout-btn {
       font-size: 11px;
-      color: #555;
-      display: flex;
-      align-items: center;
-      gap: 6px;
+      color: #666;
       border: 0.5px solid #2a2a2a;
       padding: 5px 12px;
-      border-radius: 2px;
+      border-radius: 3px;
       cursor: pointer;
-      transition: color 0.2s, border-color 0.2s;
-      letter-spacing: 0.04em;
+      background: none;
+      font-family: inherit;
+      transition: all 0.2s;
     }
-    .score-dl:hover { color: #ddd; border-color: #555; }
+    .logout-btn:hover { color: #fff; border-color: #555; }
 
-    /* ── CONTACT FORM ── */
-    .contact-section {
-      padding: 48px 40px;
-      background: #080808;
-      border-top: 0.5px solid #1e1e1e;
+    .admin-body {
+      display: flex;
+      padding-top: 52px;
+      min-height: 100vh;
     }
-    .contact-inner { max-width: 600px; }
-    .contact-title {
+
+    /* ── 사이드바 ── */
+    .sidebar {
+      width: 200px;
+      background: #111;
+      border-right: 0.5px solid #1e1e1e;
+      padding: 20px 0;
+      position: fixed;
+      top: 52px;
+      bottom: 0;
+      overflow-y: auto;
+    }
+    .sidebar-label {
+      font-size: 9px;
+      color: #444;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      padding: 0 18px;
+      margin-bottom: 6px;
+      margin-top: 16px;
+    }
+    .sidebar-label:first-child { margin-top: 0; }
+    .sidebar-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 9px 18px;
+      font-size: 13px;
+      color: #666;
+      cursor: pointer;
+      transition: all 0.15s;
+      border-left: 2px solid transparent;
+    }
+    .sidebar-item:hover { color: #ccc; background: #161616; }
+    .sidebar-item.active { color: #fff; background: #1a1a1a; border-left-color: #fff; }
+    .sidebar-icon { font-size: 15px; }
+
+    /* ── 메인 콘텐츠 ── */
+    .main-content {
+      margin-left: 200px;
+      flex: 1;
+      padding: 32px 36px;
+    }
+
+    .page { display: none; }
+    .page.active { display: block; }
+
+    .page-title {
       font-size: 20px;
       font-weight: 700;
       color: #fff;
       margin-bottom: 6px;
-      letter-spacing: -0.01em;
     }
-    .contact-sub {
+    .page-sub {
       font-size: 12px;
-      color: #444;
-      margin-bottom: 24px;
-      line-height: 1.6;
+      color: #555;
+      margin-bottom: 28px;
     }
-    .form-group { margin-bottom: 10px; }
-    .form-input, .form-textarea {
+
+    /* ── 카드 ── */
+    .card {
+      background: #1a1a1a;
+      border: 0.5px solid #252525;
+      border-radius: 8px;
+      padding: 24px;
+      margin-bottom: 20px;
+    }
+    .card-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: #fff;
+      margin-bottom: 16px;
+    }
+
+    /* ── 폼 요소 ── */
+    .field { margin-bottom: 14px; }
+    .field-label {
+      font-size: 11px;
+      color: #666;
+      margin-bottom: 5px;
+      display: block;
+    }
+    .field-input, .field-select, .field-textarea {
       width: 100%;
       background: #111;
       border: 0.5px solid #2a2a2a;
-      border-radius: 3px;
-      padding: 12px 14px;
+      border-radius: 4px;
+      padding: 9px 12px;
       font-size: 13px;
-      color: #d8d8d8;
+      color: #ccc;
+      outline: none;
       font-family: inherit;
       transition: border-color 0.2s;
-      outline: none;
-      resize: none;
     }
-    .form-input:focus, .form-textarea:focus { border-color: #555; }
-    .form-input::placeholder, .form-textarea::placeholder { color: #333; }
-    .form-textarea { height: 120px; }
-    .form-submit {
-      margin-top: 14px;
+    .field-input:focus, .field-select:focus, .field-textarea:focus { border-color: #555; }
+    .field-textarea { height: 80px; resize: vertical; }
+    .field-select option { background: #1a1a1a; }
+
+    .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .field-row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+
+    /* 체크박스 */
+    .field-check {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+    }
+    .field-check input { accent-color: #fff; width: 14px; height: 14px; }
+    .field-check span { font-size: 12px; color: #888; }
+
+    /* 파일 업로드 */
+    .file-upload {
+      border: 1px dashed #2a2a2a;
+      border-radius: 4px;
+      padding: 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: border-color 0.2s;
+    }
+    .file-upload:hover { border-color: #555; }
+    .file-upload input { display: none; }
+    .file-upload-text { font-size: 12px; color: #555; }
+    .file-upload-text strong { color: #888; display: block; margin-bottom: 4px; }
+    .file-preview {
+      margin-top: 10px;
+      font-size: 11px;
+      color: #777;
+    }
+    .file-preview img {
+      max-height: 80px;
+      border-radius: 4px;
+      margin-top: 6px;
+    }
+
+    /* 버튼 */
+    .btn {
       font-size: 12px;
       font-weight: 600;
-      letter-spacing: 0.08em;
-      background: #fff;
-      color: #0a0a0a;
+      padding: 9px 20px;
+      border-radius: 4px;
       border: none;
-      padding: 12px 28px;
-      border-radius: 2px;
       cursor: pointer;
-      transition: background 0.2s;
+      font-family: inherit;
+      transition: all 0.2s;
     }
-    .form-submit:hover { background: #d8d8d8; }
-    .form-msg { font-size: 12px; margin-top: 10px; color: #555; }
+    .btn-primary { background: #fff; color: #0f0f0f; }
+    .btn-primary:hover { background: #ddd; }
+    .btn-danger { background: #2a1010; color: #e05555; border: 0.5px solid #3a1515; }
+    .btn-danger:hover { background: #3a1515; }
+    .btn-ghost { background: transparent; color: #666; border: 0.5px solid #2a2a2a; }
+    .btn-ghost:hover { color: #ccc; border-color: #555; }
+    .btn-sm { font-size: 11px; padding: 6px 12px; }
 
-    /* ── FOOTER ── */
-    footer {
-      padding: 24px 40px;
-      border-top: 0.5px solid #1a1a1a;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      background: #080808;
+    /* ── 테이블 (목록) ── */
+    .data-table { width: 100%; border-collapse: collapse; }
+    .data-table th {
+      font-size: 10px;
+      color: #555;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      padding: 8px 12px;
+      text-align: left;
+      border-bottom: 0.5px solid #222;
     }
-    .footer-logo { font-size: 13px; font-weight: 700; color: #333; letter-spacing: 0.1em; }
-    .footer-copy { font-size: 11px; color: #2a2a2a; }
+    .data-table td {
+      padding: 12px 12px;
+      font-size: 12px;
+      color: #aaa;
+      border-bottom: 0.5px solid #1a1a1a;
+      vertical-align: middle;
+    }
+    .data-table tr:hover td { background: #161616; }
+    .data-table .td-actions { display: flex; gap: 6px; }
 
-    /* ── LOADING STATE ── */
-    .loading-placeholder {
-      background: #161616;
+    /* 배지 */
+    .badge {
+      display: inline-block;
+      font-size: 9px;
+      padding: 2px 8px;
+      border-radius: 20px;
+      font-weight: 600;
+    }
+    .badge-on { background: #0a2a0a; color: #4caf50; }
+    .badge-off { background: #1a1a1a; color: #555; }
+    .badge-highlight { background: #2a2500; color: #c9a84c; }
+    .badge-new { background: #0a1a2a; color: #5599ff; }
+    .badge-read { background: #1a1a1a; color: #555; }
+
+    /* 상태 메시지 */
+    .status-msg {
+      font-size: 12px;
+      padding: 10px 14px;
+      border-radius: 4px;
+      margin-bottom: 14px;
+      display: none;
+    }
+    .status-msg.success { background: #0a2a0a; color: #4caf50; display: block; }
+    .status-msg.error { background: #2a0a0a; color: #e05555; display: block; }
+
+    /* 업로드 진행 */
+    .progress-wrap {
+      display: none;
+      margin-top: 8px;
+    }
+    .progress-bar {
+      height: 3px;
+      background: #2a2a2a;
       border-radius: 2px;
-      animation: pulse 1.5s ease-in-out infinite;
+      overflow: hidden;
     }
-    @keyframes pulse {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.4; }
+    .progress-fill {
+      height: 100%;
+      background: #fff;
+      width: 0%;
+      transition: width 0.3s;
     }
+    .progress-text { font-size: 10px; color: #555; margin-top: 4px; }
 
-    /* ── EMPTY STATE ── */
+    /* 빈 상태 */
     .empty-state {
       text-align: center;
-      padding: 40px 20px;
-      color: #2a2a2a;
-      font-size: 12px;
-      letter-spacing: 0.06em;
+      padding: 40px;
+      color: #444;
+      font-size: 13px;
     }
 
-    /* ── MOBILE ── */
+    /* 대시보드 스탯 */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+      margin-bottom: 24px;
+    }
+    .stat-card {
+      background: #1a1a1a;
+      border: 0.5px solid #252525;
+      border-radius: 8px;
+      padding: 18px 20px;
+    }
+    .stat-label { font-size: 10px; color: #555; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 8px; }
+    .stat-value { font-size: 28px; font-weight: 700; color: #fff; }
+    .stat-sub { font-size: 11px; color: #444; margin-top: 4px; }
+
+    /* 반응형 */
     @media (max-width: 768px) {
-      nav { padding: 0 20px; }
-      .nav-links { display: none; }
-      .hero { height: 60vh; }
-      .banners { grid-template-columns: repeat(2, 1fr); }
-      .section { padding: 28px 20px; }
-      .video-grid { grid-template-columns: repeat(2, 1fr); }
-      .contact-section { padding: 32px 20px; }
-      footer { padding: 20px; flex-direction: column; gap: 8px; text-align: center; }
+      .sidebar { display: none; }
+      .main-content { margin-left: 0; padding: 20px 16px; }
+      .stats-grid { grid-template-columns: repeat(2, 1fr); }
+      .field-row, .field-row-3 { grid-template-columns: 1fr; }
     }
   </style>
 </head>
 <body>
 
-  <!-- NAV -->
-  <nav>
-    <span class="nav-logo">PRAISER</span>
-    <div class="nav-links">
-      <a href="#about">ABOUT</a>
-      <a href="#worship">WORSHIP</a>
-      <a href="#scores">SCORES</a>
-      <a href="#videos">VIDEO</a>
-      <a href="#contact">NEWS</a>
+  <!-- ── 로그인 화면 ── -->
+  <div class="login-wrap" id="loginWrap">
+    <div class="login-box">
+      <div class="login-title">Admin 로그인</div>
+      <div class="login-sub">사역팀 관리자 전용 페이지입니다</div>
+      <input class="login-input" type="email" id="loginEmail" placeholder="이메일" />
+      <input class="login-input" type="password" id="loginPw" placeholder="비밀번호" />
+      <button class="login-btn" id="loginBtn">로그인</button>
+      <div class="login-err" id="loginErr"></div>
     </div>
-    <a href="#contact" class="nav-request">REQUEST</a>
-  </nav>
+  </div>
 
-  <!-- HERO SLIDER -->
-  <section class="hero" id="about">
-    <div class="hero-slides" id="heroSlides">
-      <!-- JS로 동적 로드 -->
-    </div>
-    <button class="hero-prev" id="heroPrev">&#8249;</button>
-    <button class="hero-next" id="heroNext">&#8250;</button>
-    <div class="hero-dots" id="heroDots"></div>
-  </section>
-
-  <!-- 4-BANNER GRID -->
-  <section class="banners" id="banners">
-    <!-- JS로 동적 로드 -->
-  </section>
-
-  <!-- VIDEO SECTION -->
-  <section class="section" id="videos">
-    <div class="section-head">
-      <span class="section-title">최근 영상</span>
-      <span class="section-more" id="videoMore">전체 보기 →</span>
-    </div>
-    <div class="video-grid" id="videoGrid">
-      <!-- JS로 동적 로드 -->
-    </div>
-    <div class="more-btn-wrap">
-      <span class="more-btn" id="videMoreBtn">더보기</span>
-    </div>
-  </section>
-
-  <!-- SCORE SECTION -->
-  <section class="section" id="scores">
-    <div class="section-head">
-      <span class="section-title">악보 나눔</span>
-      <span class="section-more">전체 보기 →</span>
-    </div>
-    <div class="score-list" id="scoreList">
-      <!-- JS로 동적 로드 -->
-    </div>
-  </section>
-
-  <!-- CONTACT FORM -->
-  <section class="contact-section" id="contact">
-    <div class="contact-inner">
-      <div class="contact-title">문의하기 / 후원 연결</div>
-      <div class="contact-sub">사역 초청, 후원 문의, 기타 연락은 아래 양식으로 보내주세요.</div>
-      <div class="form-group">
-        <input class="form-input" id="contactName" type="text" placeholder="이름" />
+  <!-- ── 어드민 앱 ── -->
+  <div id="adminApp">
+    <!-- 상단 네비 -->
+    <div class="admin-nav">
+      <span class="admin-nav-title">WORSHIP TEAM · ADMIN</span>
+      <div class="admin-nav-right">
+        <span class="admin-user" id="adminUserEmail"></span>
+        <button class="logout-btn" id="logoutBtn">로그아웃</button>
       </div>
-      <div class="form-group">
-        <input class="form-input" id="contactTitle" type="text" placeholder="제목" />
-      </div>
-      <div class="form-group">
-        <textarea class="form-textarea" id="contactContent" placeholder="내용"></textarea>
-      </div>
-      <button class="form-submit" id="contactSubmit">제출하기</button>
-      <div class="form-msg" id="contactMsg"></div>
     </div>
-  </section>
 
-  <!-- FOOTER -->
-  <footer>
-    <span class="footer-logo">PRAISER</span>
-    <span class="footer-copy">© 2026 PRAISER Worship Team. All rights reserved.</span>
-  </footer>
+    <div class="admin-body">
+      <!-- 사이드바 -->
+      <div class="sidebar">
+        <div class="sidebar-label">관리</div>
+        <div class="sidebar-item active" onclick="showPage('dashboard')">
+          <span class="sidebar-icon">📊</span> 대시보드
+        </div>
+        <div class="sidebar-item" onclick="showPage('hero')">
+          <span class="sidebar-icon">🖼️</span> 히어로 사진
+        </div>
+        <div class="sidebar-item" onclick="showPage('banners')">
+          <span class="sidebar-icon">📋</span> 배너 관리
+        </div>
+        <div class="sidebar-item" onclick="showPage('videos')">
+          <span class="sidebar-icon">🎬</span> 영상 관리
+        </div>
+        <div class="sidebar-item" onclick="showPage('scores')">
+          <span class="sidebar-icon">🎵</span> 악보 나눔
+        </div>
+        <div class="sidebar-label">운영</div>
+        <div class="sidebar-item" onclick="showPage('contacts')">
+          <span class="sidebar-icon">✉️</span> 문의 목록
+        </div>
+        <div class="sidebar-label">사이트</div>
+        <div class="sidebar-item" onclick="window.open('index.html','_blank')">
+          <span class="sidebar-icon">🌐</span> 사이트 보기
+        </div>
+      </div>
 
-  <!-- SUPABASE -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+      <!-- 메인 -->
+      <div class="main-content">
+
+        <!-- 대시보드 -->
+        <div class="page active" id="page-dashboard">
+          <div class="page-title">대시보드</div>
+          <div class="page-sub">콘텐츠 현황을 한눈에 확인하세요</div>
+          <div class="stats-grid">
+            <div class="stat-card">
+              <div class="stat-label">히어로 사진</div>
+              <div class="stat-value" id="stat-hero">—</div>
+              <div class="stat-sub">활성 슬라이드</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-label">영상</div>
+              <div class="stat-value" id="stat-videos">—</div>
+              <div class="stat-sub">등록된 영상</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-label">악보</div>
+              <div class="stat-value" id="stat-scores">—</div>
+              <div class="stat-sub">공유된 악보</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-label">미확인 문의</div>
+              <div class="stat-value" id="stat-contacts">—</div>
+              <div class="stat-sub">읽지 않은 문의</div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-title">📌 빠른 안내</div>
+            <p style="font-size:13px; color:#666; line-height:1.8;">
+              • <strong style="color:#aaa;">히어로 사진</strong> — 메인 풀스크린 슬라이드 사진을 업로드하세요<br>
+              • <strong style="color:#aaa;">배너 관리</strong> — 4분할 배너의 제목/링크를 수정하세요<br>
+              • <strong style="color:#aaa;">영상 관리</strong> — YouTube 링크를 등록하면 자동으로 썸네일이 표시됩니다<br>
+              • <strong style="color:#aaa;">악보 나눔</strong> — PDF 악보 파일을 업로드해 공유하세요<br>
+              • <strong style="color:#aaa;">문의 목록</strong> — 방문자가 남긴 문의를 확인하세요
+            </p>
+          </div>
+        </div>
+
+        <!-- 히어로 사진 -->
+        <div class="page" id="page-hero">
+          <div class="page-title">히어로 사진 관리</div>
+          <div class="page-sub">메인 풀스크린 슬라이더에 표시될 사진을 업로드하세요</div>
+          <div class="card">
+            <div class="card-title">새 사진 추가</div>
+            <div class="status-msg" id="hero-msg"></div>
+            <div class="field">
+              <label class="field-label">사진 업로드</label>
+              <div class="file-upload" onclick="document.getElementById('heroFile').click()">
+                <input type="file" id="heroFile" accept="image/*" onchange="previewHeroFile(this)" />
+                <div class="file-upload-text">
+                  <strong>클릭해서 사진 선택</strong>
+                  JPG, PNG, WEBP 권장 · 최대 5MB
+                </div>
+                <div class="file-preview" id="heroPreview"></div>
+              </div>
+              <div class="progress-wrap" id="heroProgress">
+                <div class="progress-bar"><div class="progress-fill" id="heroProgressFill"></div></div>
+                <div class="progress-text" id="heroProgressText">업로드 중...</div>
+              </div>
+            </div>
+            <div class="field-row">
+              <div class="field">
+                <label class="field-label">순서 (숫자가 낮을수록 먼저)</label>
+                <input class="field-input" type="number" id="heroOrder" value="0" min="0" />
+              </div>
+              <div class="field" style="display:flex;align-items:flex-end;padding-bottom:0;">
+                <label class="field-check">
+                  <input type="checkbox" id="heroActive" checked />
+                  <span>활성화 (체크 해제 시 숨김)</span>
+                </label>
+              </div>
+            </div>
+            <button class="btn btn-primary" onclick="uploadHero()">사진 추가</button>
+          </div>
+          <div class="card">
+            <div class="card-title">등록된 사진 목록</div>
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>미리보기</th>
+                  <th>순서</th>
+                  <th>상태</th>
+                  <th>등록일</th>
+                  <th>관리</th>
+                </tr>
+              </thead>
+              <tbody id="heroList"><tr><td colspan="5" class="empty-state">불러오는 중...</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- 배너 관리 -->
+        <div class="page" id="page-banners">
+          <div class="page-title">배너 관리</div>
+          <div class="page-sub">메인 4분할 배너의 내용을 수정하세요</div>
+          <div class="card">
+            <div class="card-title">새 배너 추가</div>
+            <div class="status-msg" id="banner-msg"></div>
+            <div class="field-row">
+              <div class="field">
+                <label class="field-label">제목 (큰 글씨)</label>
+                <input class="field-input" id="bannerTitle" placeholder="예: 악보나눔" />
+              </div>
+              <div class="field">
+                <label class="field-label">카테고리 (작은 영문)</label>
+                <input class="field-input" id="bannerCat" placeholder="예: MUSIC SHEETS" />
+              </div>
+            </div>
+            <div class="field-row">
+              <div class="field">
+                <label class="field-label">링크 URL (클릭 시 이동)</label>
+                <input class="field-input" id="bannerLink" placeholder="예: #contact 또는 https://..." />
+              </div>
+              <div class="field">
+                <label class="field-label">순서</label>
+                <input class="field-input" type="number" id="bannerOrder" value="0" min="0" />
+              </div>
+            </div>
+            <div style="display:flex; gap:20px; margin-bottom:16px;">
+              <label class="field-check">
+                <input type="checkbox" id="bannerHighlight" />
+                <span>강조 카드 (밝은 배경)</span>
+              </label>
+              <label class="field-check">
+                <input type="checkbox" id="bannerActive" checked />
+                <span>활성화</span>
+              </label>
+            </div>
+            <button class="btn btn-primary" onclick="addBanner()">배너 추가</button>
+          </div>
+          <div class="card">
+            <div class="card-title">등록된 배너 목록</div>
+            <table class="data-table">
+              <thead>
+                <tr><th>제목</th><th>카테고리</th><th>강조</th><th>상태</th><th>관리</th></tr>
+              </thead>
+              <tbody id="bannerList"><tr><td colspan="5" class="empty-state">불러오는 중...</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- 영상 관리 -->
+        <div class="page" id="page-videos">
+          <div class="page-title">영상 관리</div>
+          <div class="page-sub">YouTube 링크를 등록하면 썸네일이 자동으로 표시됩니다</div>
+          <div class="card">
+            <div class="card-title">새 영상 추가</div>
+            <div class="status-msg" id="video-msg"></div>
+            <div class="field">
+              <label class="field-label">제목</label>
+              <input class="field-input" id="videoTitle" placeholder="영상 제목" />
+            </div>
+            <div class="field">
+              <label class="field-label">YouTube URL</label>
+              <input class="field-input" id="videoUrl" placeholder="https://www.youtube.com/watch?v=..." />
+            </div>
+            <div class="field-row">
+              <div class="field">
+                <label class="field-label">순서</label>
+                <input class="field-input" type="number" id="videoOrder" value="0" />
+              </div>
+              <div class="field" style="display:flex;align-items:flex-end;padding-bottom:0;">
+                <label class="field-check">
+                  <input type="checkbox" id="videoActive" checked />
+                  <span>활성화</span>
+                </label>
+              </div>
+            </div>
+            <button class="btn btn-primary" onclick="addVideo()">영상 추가</button>
+          </div>
+          <div class="card">
+            <div class="card-title">등록된 영상 목록</div>
+            <table class="data-table">
+              <thead>
+                <tr><th>썸네일</th><th>제목</th><th>상태</th><th>등록일</th><th>관리</th></tr>
+              </thead>
+              <tbody id="videoList"><tr><td colspan="5" class="empty-state">불러오는 중...</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- 악보 나눔 -->
+        <div class="page" id="page-scores">
+          <div class="page-title">악보 나눔</div>
+          <div class="page-sub">PDF 악보 파일을 업로드하면 방문자가 다운로드할 수 있습니다</div>
+          <div class="card">
+            <div class="card-title">악보 추가</div>
+            <div class="status-msg" id="score-msg"></div>
+            <div class="field">
+              <label class="field-label">악보 제목</label>
+              <input class="field-input" id="scoreTitle" placeholder="예: 은혜의 강" />
+            </div>
+            <div class="field">
+              <label class="field-label">설명 (선택)</label>
+              <input class="field-input" id="scoreDesc" placeholder="예: 2024 정기 예배 악보" />
+            </div>
+            <div class="field">
+              <label class="field-label">PDF 파일 업로드</label>
+              <div class="file-upload" onclick="document.getElementById('scoreFile').click()">
+                <input type="file" id="scoreFile" accept=".pdf" onchange="previewScoreFile(this)" />
+                <div class="file-upload-text">
+                  <strong>클릭해서 PDF 선택</strong>
+                  PDF 파일만 가능
+                </div>
+                <div class="file-preview" id="scorePreview"></div>
+              </div>
+              <div class="progress-wrap" id="scoreProgress">
+                <div class="progress-bar"><div class="progress-fill" id="scoreProgressFill"></div></div>
+                <div class="progress-text" id="scoreProgressText">업로드 중...</div>
+              </div>
+            </div>
+            <div class="field-row">
+              <div class="field">
+                <label class="field-label">순서</label>
+                <input class="field-input" type="number" id="scoreOrder" value="0" />
+              </div>
+              <div class="field" style="display:flex;align-items:flex-end;padding-bottom:0;">
+                <label class="field-check">
+                  <input type="checkbox" id="scoreActive" checked />
+                  <span>활성화</span>
+                </label>
+              </div>
+            </div>
+            <button class="btn btn-primary" onclick="uploadScore()">악보 추가</button>
+          </div>
+          <div class="card">
+            <div class="card-title">등록된 악보 목록</div>
+            <table class="data-table">
+              <thead>
+                <tr><th>제목</th><th>설명</th><th>상태</th><th>등록일</th><th>관리</th></tr>
+              </thead>
+              <tbody id="scoreList"><tr><td colspan="5" class="empty-state">불러오는 중...</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- 문의 목록 -->
+        <div class="page" id="page-contacts">
+          <div class="page-title">문의 목록</div>
+          <div class="page-sub">방문자가 남긴 문의를 확인하세요</div>
+          <div class="card">
+            <table class="data-table">
+              <thead>
+                <tr><th>상태</th><th>이름</th><th>제목</th><th>내용</th><th>접수일</th><th>관리</th></tr>
+              </thead>
+              <tbody id="contactList"><tr><td colspan="6" class="empty-state">불러오는 중...</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+
+      </div><!-- /main-content -->
+    </div><!-- /admin-body -->
+  </div><!-- /adminApp -->
+
   <script>
+    // ── Supabase 초기화 ──
     const SUPABASE_URL = 'https://ylixwsraddpmtlglddyq.supabase.co';
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlsaXh3c3JhZGRwbXRsZ2xkZHlxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0OTI3MDMsImV4cCI6MjA5ODA2ODcwM30.s0AiMaexRbFyXuczs1ngHApcUXDkhc0w4_E6o6VNM3I';
-    const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    /* ── 히어로 슬라이더 ── */
-    let currentSlide = 0;
-    let slides = [];
-
-    async function loadHero() {
-      const wrap = document.getElementById('heroSlides');
-      const dots = document.getElementById('heroDots');
-
-      const { data, error } = await sb
-        .from('hero_slides')
-        .select('*')
-        .eq('is_active', true)
-        .order('order_num');
-
-      if (!data || data.length === 0) {
-        wrap.innerHTML = `<div class="hero-slide"><span class="hero-slide-placeholder">PRAISER WORSHIP TEAM</span></div>`;
-        return;
-      }
-
-      slides = data;
-      wrap.innerHTML = slides.map(s => `
-        <div class="hero-slide" style="background-image:url('${s.image_url}')"></div>
-      `).join('');
-
-      dots.innerHTML = slides.map((_, i) => `
-        <div class="hero-dot ${i === 0 ? 'active' : ''}" onclick="goSlide(${i})"></div>
-      `).join('');
-
-      // 자동 슬라이드
-      setInterval(() => goSlide((currentSlide + 1) % slides.length), 5000);
-    }
-
-    function goSlide(n) {
-      currentSlide = n;
-      document.getElementById('heroSlides').style.transform = `translateX(-${n * 100}%)`;
-      document.querySelectorAll('.hero-dot').forEach((d, i) => {
-        d.classList.toggle('active', i === n);
-      });
-    }
-
-    document.getElementById('heroPrev').onclick = () =>
-      goSlide((currentSlide - 1 + slides.length) % slides.length);
-    document.getElementById('heroNext').onclick = () =>
-      goSlide((currentSlide + 1) % slides.length);
-
-    /* ── 배너 ── */
-    async function loadBanners() {
-      const wrap = document.getElementById('banners');
-
-      const { data } = await sb
-        .from('banners')
-        .select('*')
-        .eq('is_active', true)
-        .order('order_num');
-
-      if (!data || data.length === 0) {
-        wrap.innerHTML = `<div class="empty-state" style="grid-column:1/-1">등록된 배너가 없습니다</div>`;
-        return;
-      }
-
-      wrap.innerHTML = data.map(b => `
-        <div class="banner-item ${b.is_highlighted ? 'highlighted' : ''}"
-             onclick="${b.link_url ? `window.open('${b.link_url}')` : ''}">
-          <div class="banner-title">${b.title}</div>
-          <div class="banner-cat">${b.category}</div>
-        </div>
-      `).join('');
-    }
-
-    /* ── 영상 ── */
-    function getYoutubeId(url) {
-      const m = url.match(/(?:v=|youtu\.be\/)([^&\?\/]+)/);
-      return m ? m[1] : null;
-    }
-
-    async function loadVideos() {
-      const grid = document.getElementById('videoGrid');
-
-      const { data } = await sb
-        .from('videos')
-        .select('*')
-        .eq('is_active', true)
-        .order('order_num')
-        .limit(4);
-
-      if (!data || data.length === 0) {
-        grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1">등록된 영상이 없습니다</div>`;
-        return;
-      }
-
-      grid.innerHTML = data.map(v => {
-        const vid = getYoutubeId(v.youtube_url);
-        const thumb = vid ? `https://img.youtube.com/vi/${vid}/mqdefault.jpg` : '';
-        return `
-          <div class="video-card" onclick="window.open('${v.youtube_url}', '_blank')">
-            <div class="video-card-thumb">
-              ${thumb ? `<img src="${thumb}" alt="${v.title}" />` : ''}
-            </div>
-            <div class="video-card-overlay"></div>
-            <div class="video-play-icon"></div>
-            <div class="video-card-info">
-              <div class="video-card-title">${v.title}</div>
-            </div>
-          </div>
-        `;
-      }).join('');
-    }
-
-    /* ── 악보 ── */
-    async function loadScores() {
-      const list = document.getElementById('scoreList');
-
-      const { data } = await sb
-        .from('scores')
-        .select('*')
-        .eq('is_active', true)
-        .order('order_num');
-
-      if (!data || data.length === 0) {
-        list.innerHTML = `<div class="empty-state">등록된 악보가 없습니다</div>`;
-        return;
-      }
-
-      list.innerHTML = data.map(s => `
-        <div class="score-item">
-          <div class="score-left">
-            <div class="score-icon">♪</div>
-            <div>
-              <div class="score-name">${s.title}</div>
-              <div class="score-free">${s.description || 'PDF · 무료 나눔'}</div>
-            </div>
-          </div>
-          <a class="score-dl" href="${s.file_url}" target="_blank" download>
-            ↓ 받기
-          </a>
-        </div>
-      `).join('');
-    }
-
-    /* ── 문의 폼 ── */
-    document.getElementById('contactSubmit').onclick = async () => {
-      const name    = document.getElementById('contactName').value.trim();
-      const title   = document.getElementById('contactTitle').value.trim();
-      const content = document.getElementById('contactContent').value.trim();
-      const msg     = document.getElementById('contactMsg');
-
-      if (!title || !content) {
-        msg.textContent = '제목과 내용을 입력해주세요.';
-        msg.style.color = '#c0392b';
-        return;
-      }
-
-      const btn = document.getElementById('contactSubmit');
-      btn.disabled = true;
-      btn.textContent = '전송 중...';
-
-      const { error } = await sb.from('contacts').insert({ name, title, content });
-
-      if (error) {
-        msg.textContent = '전송 실패. 잠시 후 다시 시도해주세요.';
-        msg.style.color = '#c0392b';
+    // ── 인증 상태 체크 ──
+    sb.auth.onAuthStateChange((event, session) => {
+      if (session) {
+        document.getElementById('loginWrap').style.display = 'none';
+        document.getElementById('adminApp').style.display = 'block';
+        document.getElementById('adminUserEmail').textContent = session.user.email;
+        loadDashboard();
+        loadHeroList();
+        loadBannerList();
+        loadVideoList();
+        loadScoreList();
+        loadContactList();
       } else {
-        msg.textContent = '문의가 접수되었습니다. 감사합니다 🙏';
-        msg.style.color = '#555';
-        document.getElementById('contactName').value = '';
-        document.getElementById('contactTitle').value = '';
-        document.getElementById('contactContent').value = '';
+        document.getElementById('loginWrap').style.display = 'flex';
+        document.getElementById('adminApp').style.display = 'none';
       }
-      btn.disabled = false;
-      btn.textContent = '제출하기';
-    };
+    });
 
-    /* ── 초기 로드 ── */
-    loadHero();
-    loadBanners();
-    loadVideos();
-    loadScores();
+    // ── 로그인 ──
+    document.getElementById('loginBtn').addEventListener('click', async () => {
+      const email = document.getElementById('loginEmail').value.trim();
+      const pw = document.getElementById('loginPw').value;
+      const err = document.getElementById('loginErr');
+      err.textContent = '';
+
+      const { error } = await sb.auth.signInWithPassword({ email, password: pw });
+      if (error) {
+        err.textContent = '이메일 또는 비밀번호가 올바르지 않습니다.';
+      }
+    });
+
+    // ── 로그아웃 ──
+    document.getElementById('logoutBtn').addEventListener('click', async () => {
+      await sb.auth.signOut();
+    });
+
+    // ── 페이지 전환 ──
+    function showPage(name) {
+      document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+      document.querySelectorAll('.sidebar-item').forEach(s => s.classList.remove('active'));
+      document.getElementById('page-' + name).classList.add('active');
+      event.currentTarget.classList.add('active');
+    }
+
+    // ── 상태 메시지 ──
+    function showMsg(id, text, type = 'success') {
+      const el = document.getElementById(id);
+      el.textContent = text;
+      el.className = 'status-msg ' + type;
+      setTimeout(() => { el.className = 'status-msg'; }, 3000);
+    }
+
+    // ── 날짜 포맷 ──
+    function fmtDate(d) {
+      return new Date(d).toLocaleDateString('ko-KR', { year:'numeric', month:'2-digit', day:'2-digit' });
+    }
+
+    // ══════════════════════════════
+    // 대시보드
+    // ══════════════════════════════
+    async function loadDashboard() {
+      const [h, v, s, c] = await Promise.all([
+        sb.from('hero_slides').select('id', { count: 'exact' }).eq('is_active', true),
+        sb.from('videos').select('id', { count: 'exact' }).eq('is_active', true),
+        sb.from('scores').select('id', { count: 'exact' }).eq('is_active', true),
+        sb.from('contacts').select('id', { count: 'exact' }).eq('is_read', false),
+      ]);
+      document.getElementById('stat-hero').textContent = h.count ?? 0;
+      document.getElementById('stat-videos').textContent = v.count ?? 0;
+      document.getElementById('stat-scores').textContent = s.count ?? 0;
+      document.getElementById('stat-contacts').textContent = c.count ?? 0;
+    }
+
+    // ══════════════════════════════
+    // 히어로 사진
+    // ══════════════════════════════
+    function previewHeroFile(input) {
+      const file = input.files[0];
+      if (!file) return;
+      const preview = document.getElementById('heroPreview');
+      const reader = new FileReader();
+      reader.onload = e => {
+        preview.innerHTML = `<img src="${e.target.result}" /><div>${file.name}</div>`;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    async function uploadHero() {
+      const file = document.getElementById('heroFile').files[0];
+      if (!file) { showMsg('hero-msg', '사진을 선택해주세요.', 'error'); return; }
+
+      const progress = document.getElementById('heroProgress');
+      const fill = document.getElementById('heroProgressFill');
+      const text = document.getElementById('heroProgressText');
+      progress.style.display = 'block';
+      fill.style.width = '30%';
+      text.textContent = '업로드 중...';
+
+      const ext = file.name.split('.').pop();
+      const path = `hero/${Date.now()}.${ext}`;
+
+      const { data: upData, error: upErr } = await sb.storage
+        .from('worship-assets')
+        .upload(path, file, { cacheControl: '3600', upsert: false });
+
+      if (upErr) {
+        progress.style.display = 'none';
+        showMsg('hero-msg', '업로드 실패: ' + upErr.message, 'error');
+        return;
+      }
+
+      fill.style.width = '70%';
+
+      const { data: urlData } = sb.storage.from('worship-assets').getPublicUrl(path);
+      const imageUrl = urlData.publicUrl;
+
+      const order = parseInt(document.getElementById('heroOrder').value) || 0;
+      const isActive = document.getElementById('heroActive').checked;
+
+      const { error: dbErr } = await sb.from('hero_slides').insert({ image_url: imageUrl, order_num: order, is_active: isActive });
+
+      fill.style.width = '100%';
+      setTimeout(() => { progress.style.display = 'none'; fill.style.width = '0%'; }, 600);
+
+      if (dbErr) {
+        showMsg('hero-msg', 'DB 저장 실패: ' + dbErr.message, 'error');
+      } else {
+        showMsg('hero-msg', '사진이 추가되었습니다 ✓');
+        document.getElementById('heroFile').value = '';
+        document.getElementById('heroPreview').innerHTML = '';
+        loadHeroList();
+        loadDashboard();
+      }
+    }
+
+    async function loadHeroList() {
+      const { data } = await sb.from('hero_slides').select('*').order('order_num');
+      const tbody = document.getElementById('heroList');
+      if (!data || data.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" class="empty-state">등록된 사진이 없습니다</td></tr>';
+        return;
+      }
+      tbody.innerHTML = data.map(r => `
+        <tr>
+          <td><img src="${r.image_url}" style="height:40px;border-radius:3px;object-fit:cover;" /></td>
+          <td>${r.order_num}</td>
+          <td><span class="badge ${r.is_active ? 'badge-on' : 'badge-off'}">${r.is_active ? '활성' : '비활성'}</span></td>
+          <td>${fmtDate(r.created_at)}</td>
+          <td class="td-actions">
+            <button class="btn btn-danger btn-sm" onclick="deleteRow('hero_slides',${r.id},'heroList',loadHeroList)">삭제</button>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    // ══════════════════════════════
+    // 배너
+    // ══════════════════════════════
+    async function addBanner() {
+      const title = document.getElementById('bannerTitle').value.trim();
+      const category = document.getElementById('bannerCat').value.trim();
+      if (!title || !category) { showMsg('banner-msg', '제목과 카테고리를 입력해주세요.', 'error'); return; }
+
+      const { error } = await sb.from('banners').insert({
+        title,
+        category,
+        link_url: document.getElementById('bannerLink').value.trim() || '#',
+        order_num: parseInt(document.getElementById('bannerOrder').value) || 0,
+        is_highlighted: document.getElementById('bannerHighlight').checked,
+        is_active: document.getElementById('bannerActive').checked,
+      });
+
+      if (error) { showMsg('banner-msg', '저장 실패: ' + error.message, 'error'); return; }
+      showMsg('banner-msg', '배너가 추가되었습니다 ✓');
+      ['bannerTitle','bannerCat','bannerLink','bannerOrder'].forEach(id => document.getElementById(id).value = '');
+      loadBannerList();
+    }
+
+    async function loadBannerList() {
+      const { data } = await sb.from('banners').select('*').order('order_num');
+      const tbody = document.getElementById('bannerList');
+      if (!data || data.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" class="empty-state">등록된 배너가 없습니다</td></tr>';
+        return;
+      }
+      tbody.innerHTML = data.map(r => `
+        <tr>
+          <td style="color:#fff;font-weight:600;">${r.title}</td>
+          <td>${r.category}</td>
+          <td>${r.is_highlighted ? '<span class="badge badge-highlight">강조</span>' : '—'}</td>
+          <td><span class="badge ${r.is_active ? 'badge-on' : 'badge-off'}">${r.is_active ? '활성' : '비활성'}</span></td>
+          <td class="td-actions">
+            <button class="btn btn-danger btn-sm" onclick="deleteRow('banners',${r.id},'bannerList',loadBannerList)">삭제</button>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    // ══════════════════════════════
+    // 영상
+    // ══════════════════════════════
+    function getYtThumb(url) {
+      const m = url.match(/(?:v=|youtu\.be\/)([^&\s]+)/);
+      return m ? `https://img.youtube.com/vi/${m[1]}/mqdefault.jpg` : '';
+    }
+
+    async function addVideo() {
+      const title = document.getElementById('videoTitle').value.trim();
+      const url = document.getElementById('videoUrl').value.trim();
+      if (!title || !url) { showMsg('video-msg', '제목과 URL을 입력해주세요.', 'error'); return; }
+
+      const { error } = await sb.from('videos').insert({
+        title,
+        youtube_url: url,
+        thumbnail_url: getYtThumb(url),
+        order_num: parseInt(document.getElementById('videoOrder').value) || 0,
+        is_active: document.getElementById('videoActive').checked,
+      });
+
+      if (error) { showMsg('video-msg', '저장 실패: ' + error.message, 'error'); return; }
+      showMsg('video-msg', '영상이 추가되었습니다 ✓');
+      ['videoTitle','videoUrl','videoOrder'].forEach(id => document.getElementById(id).value = '');
+      loadVideoList();
+      loadDashboard();
+    }
+
+    async function loadVideoList() {
+      const { data } = await sb.from('videos').select('*').order('order_num');
+      const tbody = document.getElementById('videoList');
+      if (!data || data.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" class="empty-state">등록된 영상이 없습니다</td></tr>';
+        return;
+      }
+      tbody.innerHTML = data.map(r => `
+        <tr>
+          <td>${r.thumbnail_url ? `<img src="${r.thumbnail_url}" style="height:36px;border-radius:3px;" />` : '—'}</td>
+          <td style="color:#fff;">${r.title}</td>
+          <td><span class="badge ${r.is_active ? 'badge-on' : 'badge-off'}">${r.is_active ? '활성' : '비활성'}</span></td>
+          <td>${fmtDate(r.created_at)}</td>
+          <td class="td-actions">
+            <button class="btn btn-ghost btn-sm" onclick="window.open('${r.youtube_url}','_blank')">보기</button>
+            <button class="btn btn-danger btn-sm" onclick="deleteRow('videos',${r.id},'videoList',loadVideoList)">삭제</button>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    // ══════════════════════════════
+    // 악보
+    // ══════════════════════════════
+    function previewScoreFile(input) {
+      const file = input.files[0];
+      if (!file) return;
+      document.getElementById('scorePreview').innerHTML = `📄 ${file.name}`;
+    }
+
+    async function uploadScore() {
+      const file = document.getElementById('scoreFile').files[0];
+      const title = document.getElementById('scoreTitle').value.trim();
+      if (!file) { showMsg('score-msg', 'PDF 파일을 선택해주세요.', 'error'); return; }
+      if (!title) { showMsg('score-msg', '제목을 입력해주세요.', 'error'); return; }
+
+      const progress = document.getElementById('scoreProgress');
+      const fill = document.getElementById('scoreProgressFill');
+      progress.style.display = 'block';
+      fill.style.width = '30%';
+
+      const path = `scores/${Date.now()}_${file.name}`;
+      const { error: upErr } = await sb.storage.from('worship-assets').upload(path, file);
+
+      if (upErr) {
+        progress.style.display = 'none';
+        showMsg('score-msg', '업로드 실패: ' + upErr.message, 'error');
+        return;
+      }
+
+      fill.style.width = '70%';
+      const { data: urlData } = sb.storage.from('worship-assets').getPublicUrl(path);
+
+      const { error: dbErr } = await sb.from('scores').insert({
+        title,
+        file_url: urlData.publicUrl,
+        description: document.getElementById('scoreDesc').value.trim(),
+        order_num: parseInt(document.getElementById('scoreOrder').value) || 0,
+        is_active: document.getElementById('scoreActive').checked,
+      });
+
+      fill.style.width = '100%';
+      setTimeout(() => { progress.style.display = 'none'; fill.style.width = '0%'; }, 600);
+
+      if (dbErr) { showMsg('score-msg', 'DB 저장 실패: ' + dbErr.message, 'error'); return; }
+      showMsg('score-msg', '악보가 추가되었습니다 ✓');
+      document.getElementById('scoreFile').value = '';
+      document.getElementById('scorePreview').innerHTML = '';
+      document.getElementById('scoreTitle').value = '';
+      document.getElementById('scoreDesc').value = '';
+      loadScoreList();
+      loadDashboard();
+    }
+
+    async function loadScoreList() {
+      const { data } = await sb.from('scores').select('*').order('order_num');
+      const tbody = document.getElementById('scoreList');
+      if (!data || data.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" class="empty-state">등록된 악보가 없습니다</td></tr>';
+        return;
+      }
+      tbody.innerHTML = data.map(r => `
+        <tr>
+          <td style="color:#fff;font-weight:600;">🎵 ${r.title}</td>
+          <td>${r.description || '—'}</td>
+          <td><span class="badge ${r.is_active ? 'badge-on' : 'badge-off'}">${r.is_active ? '활성' : '비활성'}</span></td>
+          <td>${fmtDate(r.created_at)}</td>
+          <td class="td-actions">
+            <button class="btn btn-ghost btn-sm" onclick="window.open('${r.file_url}','_blank')">보기</button>
+            <button class="btn btn-danger btn-sm" onclick="deleteRow('scores',${r.id},'scoreList',loadScoreList)">삭제</button>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    // ══════════════════════════════
+    // 문의
+    // ══════════════════════════════
+    async function loadContactList() {
+      const { data } = await sb.from('contacts').select('*').order('created_at', { ascending: false });
+      const tbody = document.getElementById('contactList');
+      if (!data || data.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" class="empty-state">접수된 문의가 없습니다</td></tr>';
+        return;
+      }
+      tbody.innerHTML = data.map(r => `
+        <tr>
+          <td><span class="badge ${r.is_read ? 'badge-read' : 'badge-new'}">${r.is_read ? '확인' : 'NEW'}</span></td>
+          <td>${r.name || '익명'}</td>
+          <td style="color:#fff;">${r.title}</td>
+          <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${r.content}</td>
+          <td>${fmtDate(r.created_at)}</td>
+          <td class="td-actions">
+            <button class="btn btn-ghost btn-sm" onclick="markRead(${r.id})">확인</button>
+            <button class="btn btn-danger btn-sm" onclick="deleteRow('contacts',${r.id},'contactList',loadContactList)">삭제</button>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    async function markRead(id) {
+      await sb.from('contacts').update({ is_read: true }).eq('id', id);
+      loadContactList();
+      loadDashboard();
+    }
+
+    // ── 공통 삭제 ──
+    async function deleteRow(table, id, listId, reloadFn) {
+      if (!confirm('정말 삭제하시겠습니까?')) return;
+      const { error } = await sb.from(table).delete().eq('id', id);
+      if (!error) { reloadFn(); loadDashboard(); }
+    }
   </script>
 </body>
 </html>
