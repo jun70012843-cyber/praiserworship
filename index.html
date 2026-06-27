@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PRAISER</title>
+  <style>
+    /* ── RESET & BASE ── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      background: #0a0a0a;
+      color: #e8e8e8;
+      font-family: 'Pretendard', 'Apple SD Gothic Neo', sans-serif;
+      line-height: 1.5;
+      overflow-x: hidden;
+    }
+    a { text-decoration: none; color: inherit; }
+
+    /* ── NAV ── */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 40px;
+      height: 56px;
+      background: rgba(10, 10, 10, 0.92);
+      backdrop-filter: blur(8px);
+      border-bottom: 0.5px solid #1e1e1e;
+    }
+    .nav-logo {
+      font-size: 18px;
+      font-weight: 800;
+      letter-spacing: 0.12em;
+      color: #fff;
+    }
+    .nav-links {
+      display: flex;
+      gap: 32px;
+    }
+    .nav-links a {
+      font-size: 11px;
+      letter-spacing: 0.1em;
+      color: #666;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover { color: #fff; }
+    .nav-request {
+      font-size: 11px;
+      letter-spacing: 0.08em;
+      color: #fff;
+      border: 0.5px solid #444;
+      padding: 6px 14px;
+      border-radius: 2px;
+      transition: background 0.2s, border-color 0.2s;
+    }
+    .nav-request:hover { background: #fff; color: #0a0a0a; }
+
+    /* ── HERO SLIDER ── */
+    .hero {
+      position: relative;
+      width: 100%;
+      height: 100vh;
+      min-height: 500px;
+      overflow: hidden;
+      margin-top: 56px;
+    }
+    .hero-slides {
+      display: flex;
+      width: 100%;
+      height: 100%;
+      transition: transform 0.8s cubic-bezier(0.77, 0, 0.175, 1);
+    }
+    .hero-slide {
+      min-width: 100%;
+      height: 100%;
+      background: #111;
+      background-size: cover;
+      background-position: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .hero-slide-placeholder {
+      font-size: 12px;
+      color: #2a2a2a;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+    .hero-dots {
+      position: absolute;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 8px;
+      z-index: 10;
+    }
+    .hero-dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.25);
+      cursor: pointer;
+      transition: background 0.3s, transform 0.3s;
+    }
+    .hero-dot.active {
+      background: #fff;
+      transform: scale(1.3);
+    }
+    .hero-prev, .hero-next {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: 10;
+      background: none;
+      border: none;
+      color: rgba(255,255,255,0.3);
+      font-size: 28px;
+      cursor: pointer;
+      padding: 12px;
+      transition: color 0.2s;
+    }
+    .hero-prev:hover, .hero-next:hover { color: #fff; }
+    .hero-prev { left: 20px; }
+    .hero-next { right: 20px; }
+
+    /* ── 4-BANNER GRID ── */
+    .banners {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      border-top: 0.5px solid #1e1e1e;
+    }
+    .banner-item {
+      padding: 28px 24px;
+      min-height: 160px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      cursor: pointer;
+      border-right: 0.5px solid #1e1e1e;
+      transition: background 0.2s;
+      background: #0d0d0d;
+    }
+    .banner-item:last-child { border-right: none; }
+    .banner-item:hover { background: #141414; }
+    .banner-item.highlighted {
+      background: #d8d8d8;
+      color: #0a0a0a;
+    }
+    .banner-item.highlighted:hover { background: #e8e8e8; }
+    .banner-title {
+      font-size: 20px;
+      font-weight: 800;
+      line-height: 1.25;
+      letter-spacing: -0.02em;
+    }
+    .banner-cat {
+      font-size: 9px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: #444;
+    }
+    .banner-item.highlighted .banner-cat { color: #666; }
+
+    /* ── SECTION COMMON ── */
+    .section {
+      padding: 40px 40px;
+      border-top: 0.5px solid #1e1e1e;
+    }
+    .section-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 20px;
+    }
+    .section-title {
+      font-size: 15px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      color: #fff;
+    }
+    .section-more {
+      font-size: 11px;
+      color: #444;
+      letter-spacing: 0.06em;
+      cursor: pointer;
+      transition: color 0.2s;
+    }
+    .section-more:hover { color: #aaa; }
+
+    /* ── VIDEO GRID ── */
+    .video-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+    }
+    .video-card {
+      border-radius: 3px;
+      overflow: hidden;
+      aspect-ratio: 16/9;
+      background: #161616;
+      position: relative;
+      cursor: pointer;
+    }
+    .video-card iframe {
+      width: 100%; height: 100%;
+      border: none;
+      pointer-events: none;
+    }
+    .video-card-thumb {
+      width: 100%; height: 100%;
+      background: #161616;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: absolute;
+      top: 0; left: 0;
+    }
+    .video-card-thumb img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+    }
+    .video-card-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to top, rgba(0,0,0,0.75) 0%, transparent 55%);
+    }
+    .video-card-info {
+      position: absolute;
+      bottom: 8px; left: 8px; right: 8px;
+    }
+    .video-card-title {
+      font-size: 10px;
+      color: #e8e8e8;
+      line-height: 1.4;
+    }
+    .video-play-icon {
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      width: 36px; height: 36px;
+      background: rgba(255,255,255,0.15);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s;
+    }
+    .video-card:hover .video-play-icon { background: rgba(255,255,255,0.3); }
+    .video-play-icon::after {
+      content: '';
+      border-style: solid;
+      border-width: 6px 0 6px 10px;
+      border-color: transparent transparent transparent #fff;
+      margin-left: 2px;
+    }
+    .more-btn-wrap { text-align: center; margin-top: 20px; }
+    .more-btn {
+      font-size: 11px;
+      color: #555;
+      border: 0.5px solid #2a2a2a;
+      padding: 8px 28px;
+      border-radius: 2px;
+      cursor: pointer;
+      display: inline-block;
+      transition: color 0.2s, border-color 0.2s;
+      letter-spacing: 0.06em;
+    }
+    .more-btn:hover { color: #aaa; border-color: #555; }
+
+    /* ── SCORE LIST ── */
+    .score-list { display: flex; flex-direction: column; gap: 1px; background: #1a1a1a; border: 0.5px solid #1a1a1a; border-radius: 3px; overflow: hidden; }
+    .score-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 16px;
+      background: #0d0d0d;
+      transition: background 0.2s;
+    }
+    .score-item:hover { background: #131313; }
+    .score-left { display: flex; align-items: center; gap: 12px; }
+    .score-icon {
+      width: 32px; height: 32px;
+      background: #1a1a1a;
+      border-radius: 3px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px;
+    }
+    .score-name { font-size: 13px; color: #d8d8d8; }
+    .score-free { font-size: 10px; color: #444; margin-top: 1px; }
+    .score-dl {
+      font-size: 11px;
+      color: #555;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      border: 0.5px solid #2a2a2a;
+      padding: 5px 12px;
+      border-radius: 2px;
+      cursor: pointer;
+      transition: color 0.2s, border-color 0.2s;
+      letter-spacing: 0.04em;
+    }
+    .score-dl:hover { color: #ddd; border-color: #555; }
+
+    /* ── CONTACT FORM ── */
+    .contact-section {
+      padding: 48px 40px;
+      background: #080808;
+      border-top: 0.5px solid #1e1e1e;
+    }
+    .contact-inner { max-width: 600px; }
+    .contact-title {
+      font-size: 20px;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 6px;
+      letter-spacing: -0.01em;
+    }
+    .contact-sub {
+      font-size: 12px;
+      color: #444;
+      margin-bottom: 24px;
+      line-height: 1.6;
+    }
+    .form-group { margin-bottom: 10px; }
+    .form-input, .form-textarea {
+      width: 100%;
+      background: #111;
+      border: 0.5px solid #2a2a2a;
+      border-radius: 3px;
+      padding: 12px 14px;
+      font-size: 13px;
+      color: #d8d8d8;
+      font-family: inherit;
+      transition: border-color 0.2s;
+      outline: none;
+      resize: none;
+    }
+    .form-input:focus, .form-textarea:focus { border-color: #555; }
+    .form-input::placeholder, .form-textarea::placeholder { color: #333; }
+    .form-textarea { height: 120px; }
+    .form-submit {
+      margin-top: 14px;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      background: #fff;
+      color: #0a0a0a;
+      border: none;
+      padding: 12px 28px;
+      border-radius: 2px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .form-submit:hover { background: #d8d8d8; }
+    .form-msg { font-size: 12px; margin-top: 10px; color: #555; }
+
+    /* ── FOOTER ── */
+    footer {
+      padding: 24px 40px;
+      border-top: 0.5px solid #1a1a1a;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #080808;
+    }
+    .footer-logo { font-size: 13px; font-weight: 700; color: #333; letter-spacing: 0.1em; }
+    .footer-copy { font-size: 11px; color: #2a2a2a; }
+
+    /* ── LOADING STATE ── */
+    .loading-placeholder {
+      background: #161616;
+      border-radius: 2px;
+      animation: pulse 1.5s ease-in-out infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+
+    /* ── EMPTY STATE ── */
+    .empty-state {
+      text-align: center;
+      padding: 40px 20px;
+      color: #2a2a2a;
+      font-size: 12px;
+      letter-spacing: 0.06em;
+    }
+
+    /* ── MOBILE ── */
+    @media (max-width: 768px) {
+      nav { padding: 0 20px; }
+      .nav-links { display: none; }
+      .hero { height: 60vh; }
+      .banners { grid-template-columns: repeat(2, 1fr); }
+      .section { padding: 28px 20px; }
+      .video-grid { grid-template-columns: repeat(2, 1fr); }
+      .contact-section { padding: 32px 20px; }
+      footer { padding: 20px; flex-direction: column; gap: 8px; text-align: center; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav>
+    <span class="nav-logo">PRAISER</span>
+    <div class="nav-links">
+      <a href="#about">ABOUT</a>
+      <a href="#worship">WORSHIP</a>
+      <a href="#scores">SCORES</a>
+      <a href="#videos">VIDEO</a>
+      <a href="#contact">NEWS</a>
+    </div>
+    <a href="#contact" class="nav-request">REQUEST</a>
+  </nav>
+
+  <!-- HERO SLIDER -->
+  <section class="hero" id="about">
+    <div class="hero-slides" id="heroSlides">
+      <!-- JS로 동적 로드 -->
+    </div>
+    <button class="hero-prev" id="heroPrev">&#8249;</button>
+    <button class="hero-next" id="heroNext">&#8250;</button>
+    <div class="hero-dots" id="heroDots"></div>
+  </section>
+
+  <!-- 4-BANNER GRID -->
+  <section class="banners" id="banners">
+    <!-- JS로 동적 로드 -->
+  </section>
+
+  <!-- VIDEO SECTION -->
+  <section class="section" id="videos">
+    <div class="section-head">
+      <span class="section-title">최근 영상</span>
+      <span class="section-more" id="videoMore">전체 보기 →</span>
+    </div>
+    <div class="video-grid" id="videoGrid">
+      <!-- JS로 동적 로드 -->
+    </div>
+    <div class="more-btn-wrap">
+      <span class="more-btn" id="videMoreBtn">더보기</span>
+    </div>
+  </section>
+
+  <!-- SCORE SECTION -->
+  <section class="section" id="scores">
+    <div class="section-head">
+      <span class="section-title">악보 나눔</span>
+      <span class="section-more">전체 보기 →</span>
+    </div>
+    <div class="score-list" id="scoreList">
+      <!-- JS로 동적 로드 -->
+    </div>
+  </section>
+
+  <!-- CONTACT FORM -->
+  <section class="contact-section" id="contact">
+    <div class="contact-inner">
+      <div class="contact-title">문의하기 / 후원 연결</div>
+      <div class="contact-sub">사역 초청, 후원 문의, 기타 연락은 아래 양식으로 보내주세요.</div>
+      <div class="form-group">
+        <input class="form-input" id="contactName" type="text" placeholder="이름" />
+      </div>
+      <div class="form-group">
+        <input class="form-input" id="contactTitle" type="text" placeholder="제목" />
+      </div>
+      <div class="form-group">
+        <textarea class="form-textarea" id="contactContent" placeholder="내용"></textarea>
+      </div>
+      <button class="form-submit" id="contactSubmit">제출하기</button>
+      <div class="form-msg" id="contactMsg"></div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <span class="footer-logo">PRAISER</span>
+    <span class="footer-copy">© 2026 PRAISER Worship Team. All rights reserved.</span>
+  </footer>
+
+  <!-- SUPABASE -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    const SUPABASE_URL = 'https://ylixwsraddpmtlglddyq.supabase.co';
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlsaXh3c3JhZGRwbXRsZ2xkZHlxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0OTI3MDMsImV4cCI6MjA5ODA2ODcwM30.s0AiMaexRbFyXuczs1ngHApcUXDkhc0w4_E6o6VNM3I';
+    const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    /* ── 히어로 슬라이더 ── */
+    let currentSlide = 0;
+    let slides = [];
+
+    async function loadHero() {
+      const wrap = document.getElementById('heroSlides');
+      const dots = document.getElementById('heroDots');
+
+      const { data, error } = await sb
+        .from('hero_slides')
+        .select('*')
+        .eq('is_active', true)
+        .order('order_num');
+
+      if (!data || data.length === 0) {
+        wrap.innerHTML = `<div class="hero-slide"><span class="hero-slide-placeholder">PRAISER WORSHIP TEAM</span></div>`;
+        return;
+      }
+
+      slides = data;
+      wrap.innerHTML = slides.map(s => `
+        <div class="hero-slide" style="background-image:url('${s.image_url}')"></div>
+      `).join('');
+
+      dots.innerHTML = slides.map((_, i) => `
+        <div class="hero-dot ${i === 0 ? 'active' : ''}" onclick="goSlide(${i})"></div>
+      `).join('');
+
+      // 자동 슬라이드
+      setInterval(() => goSlide((currentSlide + 1) % slides.length), 5000);
+    }
+
+    function goSlide(n) {
+      currentSlide = n;
+      document.getElementById('heroSlides').style.transform = `translateX(-${n * 100}%)`;
+      document.querySelectorAll('.hero-dot').forEach((d, i) => {
+        d.classList.toggle('active', i === n);
+      });
+    }
+
+    document.getElementById('heroPrev').onclick = () =>
+      goSlide((currentSlide - 1 + slides.length) % slides.length);
+    document.getElementById('heroNext').onclick = () =>
+      goSlide((currentSlide + 1) % slides.length);
+
+    /* ── 배너 ── */
+    async function loadBanners() {
+      const wrap = document.getElementById('banners');
+
+      const { data } = await sb
+        .from('banners')
+        .select('*')
+        .eq('is_active', true)
+        .order('order_num');
+
+      if (!data || data.length === 0) {
+        wrap.innerHTML = `<div class="empty-state" style="grid-column:1/-1">등록된 배너가 없습니다</div>`;
+        return;
+      }
+
+      wrap.innerHTML = data.map(b => `
+        <div class="banner-item ${b.is_highlighted ? 'highlighted' : ''}"
+             onclick="${b.link_url ? `window.open('${b.link_url}')` : ''}">
+          <div class="banner-title">${b.title}</div>
+          <div class="banner-cat">${b.category}</div>
+        </div>
+      `).join('');
+    }
+
+    /* ── 영상 ── */
+    function getYoutubeId(url) {
+      const m = url.match(/(?:v=|youtu\.be\/)([^&\?\/]+)/);
+      return m ? m[1] : null;
+    }
+
+    async function loadVideos() {
+      const grid = document.getElementById('videoGrid');
+
+      const { data } = await sb
+        .from('videos')
+        .select('*')
+        .eq('is_active', true)
+        .order('order_num')
+        .limit(4);
+
+      if (!data || data.length === 0) {
+        grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1">등록된 영상이 없습니다</div>`;
+        return;
+      }
+
+      grid.innerHTML = data.map(v => {
+        const vid = getYoutubeId(v.youtube_url);
+        const thumb = vid ? `https://img.youtube.com/vi/${vid}/mqdefault.jpg` : '';
+        return `
+          <div class="video-card" onclick="window.open('${v.youtube_url}', '_blank')">
+            <div class="video-card-thumb">
+              ${thumb ? `<img src="${thumb}" alt="${v.title}" />` : ''}
+            </div>
+            <div class="video-card-overlay"></div>
+            <div class="video-play-icon"></div>
+            <div class="video-card-info">
+              <div class="video-card-title">${v.title}</div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    /* ── 악보 ── */
+    async function loadScores() {
+      const list = document.getElementById('scoreList');
+
+      const { data } = await sb
+        .from('scores')
+        .select('*')
+        .eq('is_active', true)
+        .order('order_num');
+
+      if (!data || data.length === 0) {
+        list.innerHTML = `<div class="empty-state">등록된 악보가 없습니다</div>`;
+        return;
+      }
+
+      list.innerHTML = data.map(s => `
+        <div class="score-item">
+          <div class="score-left">
+            <div class="score-icon">♪</div>
+            <div>
+              <div class="score-name">${s.title}</div>
+              <div class="score-free">${s.description || 'PDF · 무료 나눔'}</div>
+            </div>
+          </div>
+          <a class="score-dl" href="${s.file_url}" target="_blank" download>
+            ↓ 받기
+          </a>
+        </div>
+      `).join('');
+    }
+
+    /* ── 문의 폼 ── */
+    document.getElementById('contactSubmit').onclick = async () => {
+      const name    = document.getElementById('contactName').value.trim();
+      const title   = document.getElementById('contactTitle').value.trim();
+      const content = document.getElementById('contactContent').value.trim();
+      const msg     = document.getElementById('contactMsg');
+
+      if (!title || !content) {
+        msg.textContent = '제목과 내용을 입력해주세요.';
+        msg.style.color = '#c0392b';
+        return;
+      }
+
+      const btn = document.getElementById('contactSubmit');
+      btn.disabled = true;
+      btn.textContent = '전송 중...';
+
+      const { error } = await sb.from('contacts').insert({ name, title, content });
+
+      if (error) {
+        msg.textContent = '전송 실패. 잠시 후 다시 시도해주세요.';
+        msg.style.color = '#c0392b';
+      } else {
+        msg.textContent = '문의가 접수되었습니다. 감사합니다 🙏';
+        msg.style.color = '#555';
+        document.getElementById('contactName').value = '';
+        document.getElementById('contactTitle').value = '';
+        document.getElementById('contactContent').value = '';
+      }
+      btn.disabled = false;
+      btn.textContent = '제출하기';
+    };
+
+    /* ── 초기 로드 ── */
+    loadHero();
+    loadBanners();
+    loadVideos();
+    loadScores();
+  </script>
+</body>
+</html>
